@@ -4,13 +4,15 @@ require 'json'
 #Get User Input
 queries = []
 puts "Name an artist you are currently into..."
-queries << gets.chomp
-artist_name = "init"
+artist_name = gets.chomp
+artist_name.sub! ' ', '+'
+queries << artist_name
 artist_count = 1
 until artist_name.downcase == "done"
   puts "\n\n\nYou have entered #{artist_count} artists."
   puts "Name another artist or type DONE to see results"
   artist_name = gets.chomp
+  artist_name.sub! ' ', '+'
   if artist_name.downcase != "done" 
     queries << artist_name
     artist_count += 1

@@ -5,10 +5,14 @@ require 'json'
 queries = []
 puts "Name an artist you are currently into..."
 queries << gets
-puts "Name another artist..."
-queries << gets
-puts "Name one more artist..."
-queries << gets
+artist_name = "init"
+until artist_name.downcase == "done"
+  puts "Name another artist or type DONE to see results"
+  artist_name = gets.chomp
+  if artist_name.downcase != "done" 
+    queries << artist_name
+  end
+end
 
 #Calculate!
 suggestions = []

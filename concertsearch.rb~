@@ -5,10 +5,14 @@ require 'json'
 queries = []
 puts "Name an artist you are currently into..."
 queries << gets
-puts "Name another artist..."
-queries << gets
-puts "Name one more artist..."
-queries << gets
+artist_name = "init"
+until artist_name.downcase == "done"
+  puts "Name another artist or type DONE to see results"
+  artist_name = gets
+  if artist_name.downcase != "done" 
+    queries << artist_name
+  end
+end
 
 #Calculate!
 suggestions = []
@@ -36,7 +40,7 @@ queries.each do |query|
   end
 end
 sorted_suggestions = suggestions.sort_by { |k| k[:count] }.reverse!
-sorted_suggestions.each do |suggestion|
+sorted_suggestions[0..4].each do |suggestion|
   puts "#{ suggestion[:name] } --- #{ suggestion[:count]}"
 end
   

@@ -4,13 +4,16 @@ require 'json'
 #Get User Input
 queries = []
 puts "Name an artist you are currently into..."
-queries << gets
+queries << gets.chomp
 artist_name = "init"
+artist_count = 1
 until artist_name.downcase == "done"
+  puts "\n\n\nYou have entered #{artist_count} artists."
   puts "Name another artist or type DONE to see results"
   artist_name = gets.chomp
   if artist_name.downcase != "done" 
     queries << artist_name
+    artist_count += 1
   end
 end
 
@@ -41,6 +44,7 @@ queries.each do |query|
 end
 sorted_suggestions = suggestions.sort_by { |k| k[:count] }.reverse!
 sorted_suggestions[0..4].each do |suggestion|
-  puts "#{ suggestion[:name] } --- #{ suggestion[:count]}"
+  percentage = ((suggestion[:count]/artist_count) * 100).to_i
+  puts "#{ suggestion[:name] } --- #{ percentage }%"
 end
   

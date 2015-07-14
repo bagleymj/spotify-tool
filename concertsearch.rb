@@ -2,27 +2,26 @@ require 'open-uri'
 require 'json'
 
 
-def add_artists 
-  artist_list = []
-  artist_count = 0
-  until artist_name.downcase == "done"
-    if artist_count == 0
-      puts "Enter an artist that you like:"
-    else
-      puts "Enter another artist or type DONE to see results"
-    end
-    artist_name = gets.chomp
-    artist_name.sub! ' ', '+'
-    if artist_name.downcase != "done"
-      artist_list << artist_name
-    end
+artist_list = []
+artist_count = 0
+artist_name = "init"
+until artist_name.downcase == "done"
+  if artist_count == 0
+    puts "Enter an artist that you like:"
+  else
+    puts "You have entered #{artist_count} artist#{"s" if artist_count > 1}"
+    puts "Enter another artist or type DONE to see results"
   end
-  return artist_list
+  artist_name = gets.chomp
+  artist_name.sub! ' ', '+'
+  if artist_name.downcase != "done"
+    puts artist_name
+    artist_list << artist_name
+    artist_count += 1
+  end
 end
 
-#Get User Input
-
-queries = add_artists
+queries = artist_list
 
 #Calculate!
 suggestions = []
@@ -30,7 +29,6 @@ queries.each do |query|
   path = "https://api.spotify.com/v1/search?type=artist&q=" + query
   results = JSON.parse(open(path).read)
   artists = results.fetch("artists").fetch("items")
-  puts "Sorry, this artist could not be found."
   artist = artists.first
   id = artist.fetch("id")
   related_path = "https://api.spotify.com/v1/artists/" + id + "/related-artists"
@@ -52,7 +50,7 @@ queries.each do |query|
 end
 sorted_suggestions = suggestions.sort_by { |k| k[:count] }.reverse!
 sorted_suggestions[0..4].each do |suggestion|
-  percentage = ((suggestion[:count]/artist_count) * 100).to_i
+  percentage = ((suggestion[:count]/artist_count) * 100)
   puts "#{ suggestion[:name] } --- #{ percentage }%"
 end
 

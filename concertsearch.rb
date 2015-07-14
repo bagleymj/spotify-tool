@@ -25,7 +25,7 @@ queries = artist_list
 #Calculate!
 suggestions = []
 queries.each do |query|
-  path = "http://developer.echonest.com/api/v4/artist/similar?api_key=7B2DCIZJX0PVRLNXJ&name=#{ query }&format=json&start=0"
+  path = "http://developer.echonest.com/api/v4/artist/similar?api_key=7B2DCIZJX0PVRLNXJ&name=#{ query }&format=json&results=75&start=0"
   results = JSON.parse(open(path).read)
   artists = results.fetch("response").fetch("artists")
   artists.each do |artist|
@@ -43,9 +43,9 @@ queries.each do |query|
   end
 end
 sorted_suggestions = suggestions.sort_by { |k| k[:count] }.reverse!
-sorted_suggestions[0..4].each do |suggestion|
-  percentage = ((suggestion[:count]/artist_count) * 100)
-  puts "#{ suggestion[:name] } --- #{ percentage }%"
+sorted_suggestions[0..9].each do |suggestion|
+  percentage = (suggestion[:count].to_f/artist_count.to_f)*100
+  puts "#{ suggestion[:name] } --- #{ percentage.round(2) }%"
 end
 
   

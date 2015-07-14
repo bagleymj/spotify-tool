@@ -15,7 +15,6 @@ until artist_name.downcase == "done"
   artist_name = gets.chomp
   artist_name.sub! ' ', '+'
   if artist_name.downcase != "done"
-    puts artist_name
     artist_list << artist_name
     artist_count += 1
   end
@@ -26,15 +25,15 @@ queries = artist_list
 #Calculate!
 suggestions = []
 queries.each do |query|
-  path = "https://api.spotify.com/v1/search?type=artist&q=" + query
+  path = "http://developer.echonest.com/api/v4/artist/similar?api_key=7B2DCIZJX0PVRLNXJ&name=#{ query }&format=json&start=0"
   results = JSON.parse(open(path).read)
-  artists = results.fetch("artists").fetch("items")
-  artist = artists.first
-  id = artist.fetch("id")
-  related_path = "https://api.spotify.com/v1/artists/" + id + "/related-artists"
-  related_results = JSON.parse(open(related_path).read)
-  related_artists = related_results.fetch("artists")
-  related_artists.each do |artist|
+  artists = results.fetch("response").fetch("artists")
+  #artist = artists.first
+  #id = artist.fetch("id")
+  #related_path = "https://api.spotify.com/v1/artists/" + id + "/related-artists"
+  #related_results = JSON.parse(open(related_path).read)
+  #related_artists = related_results.fetch("artists")
+  artists.each do |artist|
     name = artist.fetch("name")
     found = false
     suggestions.each do |suggestion|

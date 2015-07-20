@@ -5,17 +5,34 @@ require 'json'
 artist_list = []
 artist_count = 0
 artist_name = "init"
-puts "Name a metro area that you live near:"
-cityquery = gets.chomp
-city_path = "http://api.songkick.com/api/3.0/search/locations.json?query=#{cityquery}&apikey=vRLjJK39RWRYVc9x"
-city_results = JSON.parse(open(city_path).read)
+
+# Establish Metro Area
+result_check = []
+until !result_check.empty?
+  puts "Name a metro area that you live near:"
+  cityquery = gets.chomp
+  city_path = "http://api.songkick.com/api/3.0/search/locations.json?query=#{cityquery}&apikey=vRLjJK39RWRYVc9x"
+  city_results = JSON.parse(open(city_path).read)
+  result_check = city_results.fetch("resultsPage").fetch("results")
+  if result_check.empty? 
+    puts "Invalid Entry, please try again."
+  end
+end
 metro_list = city_results.fetch("resultsPage").fetch("results").fetch("location")
 metro_count = 0
 metro_table = []
-puts "Which metro area are you in?"
 metro_list.each do |metro|
-  metro_name = "#{metro.fetch("metroArea").fetch("displayName")}, #{metro.fetch("metroArea").fetch("country").fetch("displayName")}"
-  location_id = metro.fetch("metroArea").fetch("id")
+  metro_area = metro.fetch("metroArea")
+  metro_city = metro_area.fetch("displayName")
+  metro_country = metro_area.fetch("country").fetch("displayName")
+  if metro_country == "US"
+    metro_state = metro_area.fetch("state").fetch("displayName")
+    metro_name = "#{metro_city}, #{metro_state}, #{metro_country}"
+  else
+    metro_state = nil
+    metro_name = "#{metro_city}, #{metro_country}"
+  end
+  location_id = metro_area.fetch("id")
   metro_found = false
   metro_table.each do |entry|
     if entry[:location_id] == location_id
@@ -30,6 +47,13 @@ end
 metro_table.each do |metro|
   puts "#{metro[:id]} - #{metro[:name]} - #{metro[:location_id]}"
 end
+puts "Which metro area are you in (enter #)?"
+metro_id = gets.chomp.to_i
+metro_id = metro_id - 1
+my_metro = metro_table[metro_id]
+sk_location_id = my_metro[:location_id]
+
+# Enter Favorite Artists
 until artist_name.downcase == "done"
   if artist_count == 0
     puts "Enter an artist that you like:"

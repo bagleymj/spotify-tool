@@ -47,9 +47,20 @@ end
 metro_table.each do |metro|
   puts "#{metro[:id]} - #{metro[:name]} - #{metro[:location_id]}"
 end
-puts "Which metro area are you in (enter #)?"
-metro_id = gets.chomp.to_i
-metro_id = metro_id - 1
+
+# Assign Metro ID
+metro_id = nil
+valid_metro_id = false
+until valid_metro_id
+  puts "Which metro area are you in (enter #)?"
+  metro_id = gets.chomp.to_i
+  metro_id = metro_id - 1
+  if metro_id >= 0 && metro_id <= (metro_count -1)
+    valid_metro_id = true
+  else
+    puts "Invalid entry, please try again"
+  end
+end
 my_metro = metro_table[metro_id]
 sk_location_id = my_metro[:location_id]
 

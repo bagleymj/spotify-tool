@@ -47,6 +47,7 @@ end
 metro_table.each do |metro|
   puts "#{metro[:id]} - #{metro[:name]} - #{metro[:location_id]}"
 end
+  city_results = JSON.parse(open(city_path).read)
 
 #Get valid metro_id
 valid_metro_id = false
@@ -81,7 +82,7 @@ end
 
 queries = artist_list
 
-#Calculate!
+#Compile list of Suggestions
 suggestions = []
 queries.each do |query|
   path = "http://developer.echonest.com/api/v4/artist/similar?api_key=7B2DCIZJX0PVRLNXJ&name=#{ query }&format=json&results=100&start=0&bucket=hotttnesss&bucket=discovery"
@@ -104,7 +105,33 @@ queries.each do |query|
   end
 end
 sorted_suggestions = suggestions.sort_by { |k| k[:count] }.reverse!
-sorted_suggestions[0..9].each do |suggestion|
-  percentage = (suggestion[:count].to_f/artist_count.to_f)*100
-  puts "#{ suggestion[:name] } --- #{ percentage.round(2) }% --- #{ suggestion[:hotttnesss] } --- #{ suggestion[:discovery] } "
+sorted_suggestions.each do |suggestion|
+  # Prepare Event Query
+  artist_query = suggestion[:name].downcase
+  artist_query.sub! ' ', '+'
+  artist_query.sub! '&', "and"
+  #artist_query.encode!(Encoding::ASCII_8BIT)
+  event_path = "http://api.songkick.com/api/3.0/events.json?apikey=vRLjJK39RWRYVc9x&artist_name=#{artist_query}&location=sk:#{sk_location_id}"
+  event_response = JSON.parse(open(event_path).read)
+  event_results = event_response.fetch("resultsPage").fetch("results")
+  
+  if !event_results.empty?
+    event_list = event_results.fetch("event")
+    percentage = (suggestion[:count].to_f/artist_count.to_f)*100
+    #puts "#{ suggestion[:name] } --- #{ percentage.round(2) }% --- #{ suggestion[:hotttnesss] } --- #{ suggestion[:discovery] } "
+    puts suggestion[:name].upcase
+    event_list.each do |event|
+      event_name = event.fetch("displayName")
+      event_venue = event.fetch("venue").fetch("displayName")
+      event_city = event.fetch("location").fetch("city")
+      event_date = event.fetch("start").fetch("date")
+      event_time = event.fetch("start").fetch("time")
+      puts event_name
+      puts event_venue
+      puts event_city
+      puts "#{event_date} at #{event_time}\n\n"
+    end
+  else
+    #puts "No events found for #{suggestion[:name]}"
+  end
 end  

@@ -1,5 +1,6 @@
 require 'open-uri'
 require 'json'
+require 'addressable'
 
 
 artist_list = []
@@ -65,6 +66,7 @@ my_metro = metro_table[metro_id]
 sk_location_id = my_metro[:location_id]
 
 # Enter Favorite Artists
+suggestions = []
 until artist_name.downcase == "done"
   if artist_count == 0
     puts "Enter an artist that you like:"
@@ -73,17 +75,24 @@ until artist_name.downcase == "done"
     puts "Enter another artist or type DONE to see results"
   end
   artist_name = gets.chomp
-  artist_name.sub! ' ', '+'
+  artist_name_plus = artist_name.sub ' ', '+'
   if artist_name.downcase != "done"
-    artist_list << artist_name
-    artist_count += 1
+    artist_path = "http://developer.echonest.com/api/v4/artist/search?api_key=7B2DCIZJX0PVRLNXJ&format=json&name=#{artist_name_plus}&results=1" 
+    artist_response = JSON.parse(open(artist_path).read)
+    artist_results = artist_response.fetch("response").fetch("artists")
+    if !artist_results.empty?
+      suggestions << {:name => artist_name, :count => 8}
+      artist_list << artist_name_plus
+      artist_count += 1
+    else
+      puts "Artist not found."
+    end
   end
 end
 
 queries = artist_list
 
 #Compile list of Suggestions
-suggestions = []
 queries.each do |query|
   path = "http://developer.echonest.com/api/v4/artist/similar?api_key=7B2DCIZJX0PVRLNXJ&name=#{ query }&format=json&results=100&start=0&bucket=hotttnesss&bucket=discovery"
   results = JSON.parse(open(path).read)
@@ -110,10 +119,15 @@ sorted_suggestions.each do |suggestion|
   artist_query = suggestion[:name].downcase
   artist_query.sub! ' ', '+'
   artist_query.sub! '&', "and"
-  #artist_query.encode!(Encoding::ASCII_8BIT)
-  event_path = "http://api.songkick.com/api/3.0/events.json?apikey=vRLjJK39RWRYVc9x&artist_name=#{artist_query}&location=sk:#{sk_location_id}"
-  event_response = JSON.parse(open(event_path).read)
-  event_results = event_response.fetch("resultsPage").fetch("results")
+  #artist_query.force_encoding!(Encoding::ASCII_8BIT)
+  if artist_query.encoding.ascii_compatible?
+    url = "http://api.songkick.com/api/3.0/events.json?apikey=vRLjJK39RWRYVc9x&artist_name=#{artist_query}&location=sk:#{sk_location_id}"
+    event_path = Addressable::URI.parse(url)
+    event_response = JSON.parse(open(event_path).read)
+    event_results = event_response.fetch("resultsPage").fetch("results")
+  else
+    event_results = []
+  end
   
   if !event_results.empty?
     event_list = event_results.fetch("event")
